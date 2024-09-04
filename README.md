@@ -6,7 +6,12 @@ https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tr
 https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
 
 
-### Run Docker image for postgres db
+### Create Docker network
+```
+docker network create pg-network
+```
+
+### Run Docker image for postgres db using network
 this is where the nyc yellow taxi data will be loaded
 ```
 docker run -it \
@@ -20,3 +25,14 @@ docker run -it \
 postgres:13   
 ```
 
+### Run Docker image for pgAdmin using network
+this is where the nyc yellow taxi data will be loaded
+```
+docker run -it \
+  -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD="root" \
+  -p 8080:80 \
+  --network=pg-network \
+  --name pgadmin-2 \
+  dpage/pgadmin4
+```
