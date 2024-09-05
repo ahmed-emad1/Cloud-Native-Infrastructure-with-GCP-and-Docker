@@ -10,6 +10,8 @@ services:
       - ./ny_taxi_postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - pgnetwork
 
   pgadmin:
     container_name: pgadmin
@@ -21,3 +23,10 @@ services:
       - ./data_pgadmin:/var/lib/pgadmin
     ports:
       - "8080:80"
+    networks:
+      - pgnetwork
+
+networks:
+  pgnetwork:
+    name: pgnetwork
+    driver: bridge
