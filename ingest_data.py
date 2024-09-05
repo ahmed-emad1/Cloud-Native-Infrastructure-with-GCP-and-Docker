@@ -1,7 +1,9 @@
 import os
+import sys
 from time import time
 import pandas as pd
 import argparse
+import pyarrow.parquet as pq
 from sqlalchemy import create_engine
 
 
@@ -14,43 +16,50 @@ def main(params):
     db = params.db
     table_name = params.table_name
     url = params.url
-    csv_name = 'yellow_taxi.csv.gz'
+    file_name = url.rsplit('/',1)[-1]
 
-    os.system(f"wget {url} -O {csv_name}")
+    os.system(f"wget {url} -O {file_name}")
 
     engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
 
-    df_iter = pd.read_csv(csv_name, iterator=True, chunksize = 100000)
-
-    df = next(df_iter)
-
-
-    df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-    df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
-
+    if '.csv' in file_name:
+        df = pd.read_csv(file_name,nrows= 10)
+        # convert to datetime as .csv does not save data types
+        df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
+        df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
+        df_iter = pd.read_csv(file_name, iterator=True, chunksize = 100000)
+    elif '.parquet' in file_name:
+        file = pq.ParquetFile(file_name)
+        df = next(file.iter_batches(batch_size=10)).to_pandas()
+        df_iter = file.iter_batches(batch_size=100000)
+    else:
+        print('Error. Only .csv or .parquet files supported at this time.')
+        sys.exit()
 
     df.head(n=0).to_sql(name=table_name, con=engine, if_exists='replace')
 
-    df.to_sql(name=table_name, con=engine, if_exists='append')
-
-    while True:
-        try:
-            df = next(df_iter)
-        except StopIteration:
-            print("All chunks processed.")
-            break
+    t_start = time()
+    count = 0
+    for batch in df_iter:
+        count+=1
+        if '.parquet' in file_name:
+            batch_df = batch.to_pandas()
+        else:
+            batch_df = batch
+             # Convert datetime columns
+            batch_df['tpep_pickup_datetime'] = pd.to_datetime(batch_df['tpep_pickup_datetime'])
+            batch_df['tpep_dropoff_datetime'] = pd.to_datetime(batch_df['tpep_dropoff_datetime'])
 
         t_start = time()
-        
-        # Convert datetime columns
-        df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
-        df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
 
         # Append to SQL table
-        df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
+        batch_df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
 
         t_end = time()
         print(f'Time for appending chunk: {t_end - t_start:.3f} seconds')
+    
+    t_end = time()   
+    print(f'Completed! Total time taken was {t_end-t_start:10.3f} seconds for {count} batches.')    
 
 
 
