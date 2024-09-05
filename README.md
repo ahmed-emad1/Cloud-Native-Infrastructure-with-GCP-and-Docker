@@ -5,6 +5,10 @@ commands for running project locally
 https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz
 https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
 
+### Build image everytime you update script
+```
+docker build -t taxi_ingest:v001 .
+```
 
 ### Create Docker network
 ```
@@ -63,10 +67,10 @@ docker-compose up
 ## to ingest the data and load it into the db 
 to change docker_sql_default with the name of your local dev folder followed by _default for example local_dev_default
 ```
-URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+URL="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
 
-docker run -it \
-  --network=docker_sql_default \
+docker run --rm -it \
+  --network=pgnetwork \
   taxi_ingest:v001 \
     --user=root \
     --password=root \
