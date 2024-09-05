@@ -47,7 +47,7 @@ def main(params):
         df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
 
         # Append to SQL table
-        df.to_sql(name='yellow_taxi_data', con=engine, if_exists='append', index=False)
+        df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
 
         t_end = time()
         print(f'Time for appending chunk: {t_end - t_start:.3f} seconds')
