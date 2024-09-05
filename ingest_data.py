@@ -5,16 +5,6 @@ import argparse
 from sqlalchemy import create_engine
 
 
-
-parser = argparse.ArgumentParser(description='ingest CSV data')
-parser.add_argument('user',help='username for postgres')
-parser.add_argument('password',help='password for postgres')
-parser.add_argument('host',help='host name for postgres')
-parser.add_argument('port',help='port name for postgres')
-parser.add_argument('db',help='db name for postgres')
-parser.add_argument('table_name',help='name of table where data will be written')
-parser.add_argument('url',help='url for data file')
-
 def main(params):
 
     user = params.user
@@ -24,16 +14,13 @@ def main(params):
     db = params.db
     table_name = params.table_name
     url = params.url
-    csv_name = 'yellow_taxi.csv'
+    csv_name = 'yellow_taxi.csv.gz'
 
-    os.system(f'wget {url} -O {csv_name}')
+    os.system(f"wget {url} -O {csv_name}")
 
     engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
 
-
-    df_iter = pd.read_csv(csv_name,iterator=True, chunksize = 100000)
-
-
+    df_iter = pd.read_csv(csv_name, iterator=True, chunksize = 100000)
 
     df = next(df_iter)
 
@@ -41,14 +28,10 @@ def main(params):
     df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
     df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
 
-    df.head(0).to_sql(name=table_name, con=engine, if_exists='replace')
 
+    df.head(n=0).to_sql(name=table_name, con=engine, if_exists='replace')
 
     df.to_sql(name=table_name, con=engine, if_exists='append')
-
-
-    import pandas as pd
-    from time import time
 
     while True:
         try:
