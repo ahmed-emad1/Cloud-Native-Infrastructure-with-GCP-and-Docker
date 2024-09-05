@@ -53,3 +53,31 @@ docker run -it \
     --table_name=yellow_taxi_trips \
     --url=${URL}
 ```
+
+### Use Docker compose file to build and run above containers
+use the following command to build
+```
+docker-compose up
+```
+
+## to ingest the data and load it into the db 
+to change docker_sql_default with the name of your local dev folder followed by _default for example local_dev_default
+```
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+
+docker run -it \
+  --network=docker_sql_default \
+  taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pgdatabase \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_trips \
+    --url=${URL}
+```
+
+then to turn off and delete the containers and the network
+```
+docker-compose down
+```
