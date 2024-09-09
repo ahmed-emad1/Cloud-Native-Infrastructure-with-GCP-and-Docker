@@ -7,15 +7,15 @@ import pyarrow.parquet as pq
 from sqlalchemy import create_engine
 
 
-def main(params):
+def main():
 
-    user = params.user
-    password = params.password
-    host = params.host 
-    port = params.port 
-    db = params.db
-    table_name = params.table_name
-    url = params.url
+    user = os.getenv('USER')
+    password = os.getenv('PASSWORD')
+    host = os.getenv('HOST')
+    port = os.getenv('PORT')
+    db = os.getenv('DB')
+    table_name = os.getenv('TABLE_NAME')
+    url = os.getenv('URL')
     file_name = url.rsplit('/',1)[-1]
 
     os.system(f"wget {url} -O {file_name}")
@@ -66,16 +66,4 @@ def main(params):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='ingest CSV data')
- 
-    parser.add_argument('--user',help='username for postgres')
-    parser.add_argument('--password',help='password for postgres')
-    parser.add_argument('--host',help='host name for postgres')
-    parser.add_argument('--port',help='port name for postgres')
-    parser.add_argument('--db',help='db name for postgres')
-    parser.add_argument('--table_name',help='name of table where data will be written')
-    parser.add_argument('--url',help='url for data file')
-
-    args = parser.parse_args()
-
-    main(args)
+    main()
