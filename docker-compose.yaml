@@ -26,6 +26,24 @@ services:
     networks:
       - pgnetwork
 
+  taxi_ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Specify the path to your Dockerfile
+    environment:
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
+      - HOST=pgdatabase
+      - PORT=5432
+      - DB=${POSTGRES_DB}
+      - TABLE_NAME=yellow_taxi_trips
+      - URL=https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz
+    networks:
+      - pgnetwork
+    depends_on:
+      - pgdatabase
+    container_name: taxi_ingest
+
 networks:
   pgnetwork:
     name: pgnetwork
