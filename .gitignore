@@ -1,5 +1,6 @@
 /ny_taxi_postgres_data
 /data_pgadmin
 /data
+/.ipynb_checkpoints
 .DS_Store
 .env
