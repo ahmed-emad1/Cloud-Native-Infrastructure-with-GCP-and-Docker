@@ -61,7 +61,7 @@ docker run -it \
 ### Use Docker compose file to build and run above containers
 use the following command to build
 ```
-docker-compose up
+docker compose up
 ```
 
 ## to ingest the data and load it into the db 
@@ -83,5 +83,22 @@ docker run --rm -it \
 
 then to turn off and delete the containers and the network
 ```
-docker-compose down
+docker compose down
 ```
+
+### run the entire project and the ingestion script
+added the script build and run to the docker compose file and everything can be possibly run by just executing
+```
+docker compose up
+```
+
+if you would like to run with out seeing the logs you can run in detached mode
+```
+docker compose up -d
+```
+
+check the db using pgAdmin that the data has been ingested then kill the the process and use
+```
+docker compose down
+```
+to destroy all containers and the network
