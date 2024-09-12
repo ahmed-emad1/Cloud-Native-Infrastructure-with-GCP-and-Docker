@@ -1,22 +1,21 @@
-commands for running project locally
+# Commands for Running the Project Locally
 
+## Data File Links
+- [January 2021 CSV Data](https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz)
+- [January 2024 Parquet Data](https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet)
 
-### data file links
-https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz
-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
-
-### Build image everytime you update script
-```
-docker build -t taxi_ingest:v001 .
-```
+## Build Docker Image After Updating the Script
+Build the Docker image every time the script is updated:
+```docker build -t taxi_ingest:v001 .```
 
 ### Create Docker network
+Create a network for Docker containers:
 ```
 docker network create pg-network
 ```
 
-### Run Docker image for postgres db using network
-this is where the nyc yellow taxi data will be loaded
+### Run Postgres Docker Container Using the Network
+This container will host the NYC yellow taxi data:
 ```
 docker run -it \
 -e POSTGRES_USER="root" \
@@ -29,8 +28,8 @@ docker run -it \
 postgres:13   
 ```
 
-### Run Docker image for pgAdmin using network
-this is where the nyc yellow taxi data will be loaded
+### Run pgAdmin Docker Container Using the Network
+pgAdmin will be used to manage the database:
 ```
 docker run -it \
   -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
@@ -41,8 +40,8 @@ docker run -it \
   dpage/pgadmin4
 ```
 
-### Run the script with Docker 
-
+### Run the Ingestion Script with Docker
+Run the script to ingest NYC taxi data into the database:
 ```
 URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
 
@@ -58,14 +57,14 @@ docker run -it \
     --url=${URL}
 ```
 
-### Use Docker compose file to build and run above containers
-use the following command to build
+### Use Docker Compose to Build and Run Containers
+Use Docker Compose to set up and run the containers using `docker-compose-without-ingestion-script.yaml`:
 ```
 docker compose up
 ```
 
-## to ingest the data and load it into the db 
-to change docker_sql_default with the name of your local dev folder followed by _default for example local_dev_default
+### Ingest Data and Load it into the Database
+To ingest data into the database, adjust the network name as needed (replace `docker_sql_default` with `local_dev_default` or the appropriate name):
 ```
 URL="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
 
@@ -81,24 +80,26 @@ docker run --rm -it \
     --url=${URL}
 ```
 
-then to turn off and delete the containers and the network
+### Tear Down Containers and Network
+To stop and remove all containers and networks except the container that ran the script as it wasn't made using docker compose:
 ```
 docker compose down
 ```
 
-### run the entire project and the ingestion script
-added the script build and run to the docker compose file and everything can be possibly run by just executing
+### Run the Entire Project and Ingestion Script
+You can add the script build and run steps to the Docker Compose file. To run everything at once use `docker-compose.yaml`:
 ```
+docker compose build
 docker compose up
 ```
 
-if you would like to run with out seeing the logs you can run in detached mode
+To run in detached mode (without logs):
 ```
 docker compose up -d
 ```
 
-check the db using pgAdmin that the data has been ingested then kill the the process and use
+## Check Data in pgAdmin and Tear Down
+After confirming the data has been ingested using pgAdmin, you can stop the containers and remove them:
 ```
 docker compose down
 ```
-to destroy all containers and the network
